@@ -1,13 +1,195 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookIt | Login</title>
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-container {
+      background: rgba(255,255,255,0.97);
+      border-radius: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+      padding: 2.5rem 2rem 2rem 2rem;
+      width: 100%;
+      max-width: 370px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .auth-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #7c3aed;
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+    .tab-group {
+      display: flex;
+      width: 100%;
+      margin-bottom: 2rem;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 2px 8px 0 rgba(124,58,237,0.07);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 1rem 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #7c3aed;
+      background: #ede9fe;
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab-btn.active {
+      background: linear-gradient(90deg, #7c3aed 0%, #6366f1 100%);
+      color: #fff;
+    }
+    .auth-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      margin-bottom: 0.5rem;
+      animation: fadeIn 0.5s;
+    }
+    .auth-form input {
+      padding: 0.8rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .auth-form input:focus {
+      border: 1.5px solid #7c3aed;
+    }
+    .auth-btn {
+      background: linear-gradient(90deg, #7c3aed 0%, #6366f1 100%);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.9rem 0;
+      font-size: 1.1rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .auth-btn:hover {
+      background: linear-gradient(90deg, #6366f1 0%, #7c3aed 100%);
+      transform: translateY(-2px) scale(1.03);
+    }
+    .auth-error {
+      color: #dc2626;
+      font-size: 0.95rem;
+      text-align: center;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-title">BookIt</div>
+    <div class="tab-group">
+      <button class="tab-btn active" id="signInTab">Sign In</button>
+      <button class="tab-btn" id="signUpTab">Sign Up</button>
+    </div>
+    <form class="auth-form" id="loginForm">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit" class="auth-btn">Sign In</button>
+      <div class="auth-error" id="loginError">Invalid email or password.</div>
+    </form>
+    <form class="auth-form" id="signupForm" style="display:none;">
+      <input type="email" id="signupEmail" placeholder="Email" required />
+      <input type="password" id="signupPassword" placeholder="Password" required />
+      <button type="submit" class="auth-btn">Sign Up</button>
+      <div class="auth-error" id="signupError"></div>
+    </form>
+  </div>
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBmE5Xh2bFDSUbh8YNVTr7Jp-AHb1l3t8I",
+      authDomain: "bms-clone-77418.firebaseapp.com",
+      // ... rest of config
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Tab switching logic
+    const signInTab = document.getElementById('signInTab');
+    const signUpTab = document.getElementById('signUpTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    signInTab.onclick = function() {
+      signInTab.classList.add('active');
+      signUpTab.classList.remove('active');
+      loginForm.style.display = '';
+      signupForm.style.display = 'none';
+    };
+    signUpTab.onclick = function() {
+      signUpTab.classList.add('active');
+      signInTab.classList.remove('active');
+      signupForm.style.display = '';
+      loginForm.style.display = 'none';
+    };
+
+    // Login
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          document.getElementById('loginError').style.display = 'none';
+          alert('Sign in successful!');
+          window.location.href = 'dashboard.html';
+        })
+        .catch((error) => {
+          document.getElementById('loginError').textContent = error.message;
+          document.getElementById('loginError').style.display = 'block';
+        });
+    });
+    // Sign Up
+    signupForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          document.getElementById('signupError').style.display = 'none';
+          alert('Sign up successful!');
+          window.location.href = 'dashboard.html';
+        })
+        .catch((error) => {
+          document.getElementById('signupError').textContent = error.message;
+          document.getElementById('signupError').style.display = 'block';
+        });
+    });
+  </script>
+</body>
 </html>
